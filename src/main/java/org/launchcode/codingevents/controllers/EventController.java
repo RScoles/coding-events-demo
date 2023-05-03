@@ -16,43 +16,38 @@ import java.util.List;
 @RequestMapping("events")
 public class EventController {
 
-
+    private static List<String> events = new ArrayList<>();
 
     @GetMapping
     public String displayAllEvents(Model model) {
-        model.addAttribute("title", "All Events");
-        model.addAttribute("events", EventData.getAll());
+        model.addAttribute("events", events);
         return "events/index";
     }
 
     @GetMapping("create")
-    public String displayCreateEventForm(Model model) {
-        model.addAttribute("title", "Create Event");
+    public String displayCreateEventForm() {
         return "events/create";
     }
 
     @PostMapping("create")
-    public String processCreateEventForm(@ModelAttribute Event newEvent) {
-        EventData.add(newEvent);
+    public String processCreateEventForm(@RequestParam String eventName) {
+        events.add(eventName);
         return "redirect:";
     }
-
-    @GetMapping("delete")
-    public String displayDeleteEventForm(Model model) {
-        model.addAttribute("title", "Delete Event");
-        model.addAttribute("events", EventData.getAll());
-        return "events/delete";
+    @GetMapping("edit/{eventId}")
+    public String displayEditForm(Model model, @PathVariable int eventId) {
+        Event event = EventData.getById(eventId);
+        String title= "Edit Event" + event.getName() +  "(id=" +event.getId() + ")";
+        model.addAttribute("event", event );
+        model.addAttribute("title", title);
+        return "events/edit";
     }
-
-    @PostMapping("delete")
-    public String processDeleteEventsForm(@RequestParam(required = true) int [] eventIds) {
-
-        if (eventIds != null) {
-        for ( int id: eventIds) {
-            EventData.remove(id);
-        }
-        }
-        return  "redirect:";
+    @PostMapping("edit")
+    public String processEditForm(int eventId, String name, String description) {
+       Event myEvent =EventData.getById(eventId);
+       myEvent.setName(name);
+       myEvent.setDescription(description);
+        // controller code will go here
+        return "redirect:/events";
     }
-
 }
